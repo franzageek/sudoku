@@ -1,4 +1,4 @@
-use crate::tile;
+use crate::tile::{self, Coord, TileLoc};
 
 #[allow(dead_code)]
 pub struct Grid {
@@ -9,19 +9,18 @@ pub struct Grid {
 }
 
 #[allow(dead_code)]
-pub enum TileLoc {
-    Row,
-    Col,
-    Block,
-}
-
-#[allow(dead_code)]
 impl Grid {
     pub fn new() -> Grid {
-        let tiles: Vec<tile::Tile> = vec![
+        let mut tiles: Vec<tile::Tile> = vec![
             tile::Tile {
                 val: 0,
-                can_edit: false
+                can_edit: false,
+                coord: Coord {
+                    w: 0,
+                    x: 0,
+                    y: 0,
+                    z: 0
+                },
             };
             81
         ];
@@ -34,6 +33,10 @@ impl Grid {
             let index_block_x: u8 = (index_h - index_h % 3) / 3;
             let index_block_y: u8 = (index_v - index_v % 3) / 3;
             let index_block: u8 = index_block_y * 3 + index_block_x;
+            tiles[i as usize].coord.w = index_block;
+            tiles[i as usize].coord.x = index_h;
+            tiles[i as usize].coord.y = index_v;
+            tiles[i as usize].coord.z = i;
             v_rows[index_v as usize].push(i);
             v_cols[index_h as usize].push(i);
             v_blocks[index_block as usize].push(i);
@@ -49,6 +52,7 @@ impl Grid {
             blocks: v_blocks,
         };
     }
+
     pub fn get_from(&mut self, loc: &TileLoc, (lidx, tidx): (u8, u8)) -> &tile::Tile {
         match loc {
             TileLoc::Row => {
@@ -62,6 +66,7 @@ impl Grid {
             }
         }
     }
+
     pub fn get_missing_from(&mut self, loc: TileLoc, n: u8) -> Vec<u8> {
         let mut table: Vec<bool> = vec![true; 9];
         let mut missing: Vec<u8> = Vec::with_capacity(0);
@@ -82,12 +87,27 @@ impl Grid {
         let tiles: Vec<u8> = std::fs::read_to_string(filename)
             .expect("error: cannot read file")
             .into_bytes();
+        if tiles.len() != 81 && tiles.len() != 82 {
+            panic!("error: the provided sudoku file is invalid");
+        }
         for i in 0..tiles.len() - 1 {
-            self.tiles[i] = tile::Tile {
-                val: tiles[i] - 0x30,
-                can_edit: false,
-            };
+            if tiles[i] > 0x30 && tiles[i] <= 0x39 {
+                self.tiles[i].val = tiles[i] - 0x30;
+                self.tiles[i].can_edit = false;
+            } else if tiles[i] == 0x2E {
+                self.tiles[i].val = 0;
+                self.tiles[i].can_edit = true;
+            }
         }
         return;
+    }
+
+    pub fn contains(&mut self, loc: TileLoc, n: u8, val: u8) -> bool {
+        for i in 0..9 {
+            if self.get_from(&loc, (n, i)).val == val {
+                return true;
+            }
+        }
+        return false;
     }
 }
