@@ -1,7 +1,23 @@
 use crate::grid;
+use crate::solver;
+use crate::tile;
 use crate::ui;
 use raylib::prelude::RaylibDraw;
 use raylib::*;
+
+fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
+    let w: u8 = grid.tiles[n as usize].coord.w;
+    let x: u8 = grid.tiles[n as usize].coord.x;
+    let y: u8 = grid.tiles[n as usize].coord.y;
+    let val: u8 = grid.tiles[n as usize].val;
+    if grid.contains(tile::TileLoc::Block, w, val)
+        || grid.contains(tile::TileLoc::Col, x, val)
+        || grid.contains(tile::TileLoc::Row, y, val)
+    {
+        return false;
+    }
+    return true;
+}
 
 pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
     while !handle.window_should_close() {
@@ -11,8 +27,23 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
             let col: i32 = (mouse_pos.x as i32) / ui::TILE_SIZE as i32;
             let row: i32 = (mouse_pos.y as i32) / ui::TILE_SIZE as i32;
             let tile: i32 = row * 9 + col;
+            /* vvvv DISABLE vvvv */
+            assert_eq!(col as u8, grid.tiles[tile as usize].coord.x);
+            assert_eq!(row as u8, grid.tiles[tile as usize].coord.y);
+            assert_eq!(tile as u8, grid.tiles[tile as usize].coord.z);
+            /* ^^^^ DISABLE ^^^^ */
             println!("click on x{col}y{row}z{tile}");
         }
+        let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
+        rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+        ui::draw_tiles(&mut rldh, grid);
+    }
+    return;
+}
+
+pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
+    solver::solve(grid);
+    while !handle.window_should_close() {
         let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
         rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
         ui::draw_tiles(&mut rldh, grid);

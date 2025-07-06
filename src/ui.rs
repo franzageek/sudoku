@@ -19,17 +19,23 @@ pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
                 (TILE_SIZE - PADDING) as i32,
                 raylib::color::rcolor(0xFF, 0xFF, 0xFF, 0xDD),
             );
-            rldh.draw_text(
-                grid.tiles[(row * 9 + col) as usize]
-                    .val
-                    .to_ascii_lowercase()
-                    .to_string()
-                    .as_str(),
-                (x + TILE_SIZE / 2 - PADDING * 3) as i32,
-                (y + TILE_SIZE / 2 - PADDING * 8) as i32,
-                60,
-                raylib::color::rcolor(0, 0x77, 0xAA, 0xFF),
-            );
+            if grid.tiles[(row * 9 + col) as usize].val > 0 {
+                rldh.draw_text(
+                    grid.tiles[(row * 9 + col) as usize]
+                        .val
+                        .to_ascii_lowercase()
+                        .to_string()
+                        .as_str(),
+                    (x + TILE_SIZE / 2 - PADDING * 3) as i32,
+                    (y + TILE_SIZE / 2 - PADDING * 8) as i32,
+                    60,
+                    if grid.tiles[(row * 9 + col) as usize].can_edit {
+                        raylib::color::rcolor(0xFF, 0xAA, 0x77, 0xFF)
+                    } else {
+                        raylib::color::rcolor(0, 0x77, 0xAA, 0xFF)
+                    },
+                );
+            }
         }
     }
 }
