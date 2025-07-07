@@ -1,11 +1,7 @@
-use std::thread::sleep;
-use std::time::Duration;
-
 use crate::grid;
 use crate::tile;
 use crate::ui;
 use raylib::prelude::RaylibDraw;
-use raylib::prelude::RaylibDrawHandle;
 use raylib::*;
 
 pub fn solve(
