@@ -5,6 +5,7 @@ use crate::ui;
 use raylib::prelude::RaylibDraw;
 use raylib::*;
 
+#[allow(dead_code)]
 fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
     let w: u8 = grid.tiles[n as usize].coord.w;
     let x: u8 = grid.tiles[n as usize].coord.x;
@@ -19,6 +20,7 @@ fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
     return true;
 }
 
+#[allow(dead_code)]
 pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
     while !handle.window_should_close() {
         if handle.is_mouse_button_pressed(raylib::ffi::MouseButton::MOUSE_BUTTON_LEFT) {
@@ -41,6 +43,7 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
     return;
 }
 
+#[allow(unreachable_code)]
 pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
     solver::solve((&mut handle, &thread), None, grid);
     let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
