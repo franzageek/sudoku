@@ -42,11 +42,10 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
 }
 
 pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
-    solver::solve(grid);
-    while !handle.window_should_close() {
-        let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
-        rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
-        ui::draw_tiles(&mut rldh, grid);
-    }
+    solver::solve((&mut handle, &thread), None, grid);
+    let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
+    rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+    ui::draw_tiles(&mut rldh, grid);
+    loop {}
     return;
 }

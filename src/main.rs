@@ -8,7 +8,7 @@ use raylib;
 
 fn main() {
     let mut grid: grid::Grid = grid::Grid::new();
-    grid.polulate("test.sdk");
+    grid.polulate("new.sdk");
     game::solve(
         raylib::init()
             .size(ui::WINDOW_SIZE as i32, ui::WINDOW_SIZE as i32)
