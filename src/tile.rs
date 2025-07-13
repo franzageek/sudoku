@@ -1,5 +1,5 @@
-#[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
+#[derive(Debug, Clone, Copy)]
 pub struct Coord {
     pub w: u8, // block
     pub x: u8, // col
@@ -7,17 +7,26 @@ pub struct Coord {
     pub z: u8, // index -- might have to disable
 }
 
-#[derive(Debug, Clone, Copy)]
 #[allow(dead_code)]
+#[derive(Debug, Clone, Copy)]
 pub struct Tile {
     pub val: u8,
-    pub can_edit: bool,
+    pub access: Access,
     pub coord: Coord,
 }
 
 #[allow(dead_code)]
-pub enum TileLoc {
+#[derive(Eq, PartialEq)]
+pub enum Unit {
+    Block,
     Row,
     Col,
-    Block,
+}
+
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
+pub enum Access {
+    Default,
+    Step1,
+    Step2,
+    CanEdit
 }

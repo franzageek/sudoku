@@ -11,9 +11,9 @@ fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
     let x: u8 = grid.tiles[n as usize].coord.x;
     let y: u8 = grid.tiles[n as usize].coord.y;
     let val: u8 = grid.tiles[n as usize].val;
-    if grid.contains(tile::TileLoc::Block, w, val)
-        || grid.contains(tile::TileLoc::Col, x, val)
-        || grid.contains(tile::TileLoc::Row, y, val)
+    if grid.contains(tile::Unit::Block, w, val)
+        || grid.contains(tile::Unit::Col, x, val)
+        || grid.contains(tile::Unit::Row, y, val)
     {
         return false;
     }
@@ -45,10 +45,21 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
 
 #[allow(unreachable_code)]
 pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
-    solver::solve((&mut handle, &thread), None, grid);
-    let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
-    rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
-    ui::draw_tiles(&mut rldh, grid);
-    loop {}
+    //if solver::backtracking((&mut handle, &thread), None, grid) {
+    if solver::lrc((&mut handle, &thread), None, grid) {
+        println!("<@@>| solved!")
+    } else {
+        println!("<!!>| cannot solve sudoku with current method alone -- starting backtracker for the final step...");
+        if solver::backtracking((&mut handle, &thread), None, grid) {
+            println!("<@@>| solved!")
+        } else {
+            eprintln!("error: cannot solve sudoku");
+        }
+    }
+    while !handle.window_should_close() {
+        let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
+        ui::draw_tiles(&mut rldh, grid);
+        rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+    }
     return;
 }

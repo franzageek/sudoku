@@ -1,4 +1,4 @@
-use crate::grid;
+use crate::{grid, tile};
 use crate::ui::drawing::RaylibDrawHandle;
 use raylib::prelude::RaylibDraw;
 use raylib::*;
@@ -29,10 +29,14 @@ pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
                     (x + TILE_SIZE / 2 - PADDING * 3) as i32,
                     (y + TILE_SIZE / 2 - PADDING * 8) as i32,
                     60,
-                    if grid.tiles[(row * 9 + col) as usize].can_edit {
-                        raylib::color::rcolor(0xFF, 0xAA, 0x77, 0xFF)
-                    } else {
+                    if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Default  {
                         raylib::color::rcolor(0, 0x77, 0xAA, 0xFF)
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Step1 {
+                        raylib::color::rcolor(00, 0xDD, 0x55, 0xFF)
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Step2 {
+                        raylib::color::rcolor(0xFF, 0x55, 0x55, 0xFF)
+                    } else {
+                        raylib::color::rcolor(0xFF, 0xAA, 0x77, 0xFF)
                     },
                 );
             }
