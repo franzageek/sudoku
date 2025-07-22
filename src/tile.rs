@@ -1,3 +1,5 @@
+use crate::tile;
+
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy)]
 pub struct Coord {
@@ -16,12 +18,42 @@ pub struct Tile {
 }
 
 #[allow(dead_code)]
-#[derive(Eq, PartialEq)]
-pub enum Unit {
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub enum UnitType {
     Block,
     Row,
     Col,
 }
+
+#[derive(Clone)]
+pub struct Unit {
+    pub data: Vec<u8>,
+    pub full: u16,
+    pub count: u8
+    //pub kind: UnitType 
+}
+
+impl std::fmt::Debug for Unit {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Unit {{ data: {:?}, full: {:#b}, count: {} }}", self.data, self.full, self.count)
+    }
+}
+
+impl Unit {
+    pub fn update(&mut self, tiles: &mut Vec<tile::Tile>) {
+        self.full = 0;
+        self.count = 0;
+        for i in 0usize..9usize {
+            let val: u8 = tiles[self.data[i] as usize].val;
+            if val > 0 {
+                self.full |= 1 << (val - 1);
+                self.count += 1;
+            }
+        }
+        //println!("updated presence: {:09b}->{:09b}", (!old) & 0x1FF, (!self.full) & 0x1FF);
+    }
+}
+
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Access {

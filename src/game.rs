@@ -6,14 +6,14 @@ use raylib::prelude::RaylibDraw;
 use raylib::*;
 
 #[allow(dead_code)]
-fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
+pub fn check_violation(n: u8, grid: &mut grid::Grid) -> bool {
     let w: u8 = grid.tiles[n as usize].coord.w;
     let x: u8 = grid.tiles[n as usize].coord.x;
     let y: u8 = grid.tiles[n as usize].coord.y;
     let val: u8 = grid.tiles[n as usize].val;
-    if grid.contains(tile::Unit::Block, w, val)
-        || grid.contains(tile::Unit::Col, x, val)
-        || grid.contains(tile::Unit::Row, y, val)
+    if grid.contains(tile::UnitType::Block, w, val)
+        || grid.contains(tile::UnitType::Col, x, val)
+        || grid.contains(tile::UnitType::Row, y, val)
     {
         return false;
     }
@@ -46,11 +46,11 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
 #[allow(unreachable_code)]
 pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
     //if solver::backtracking((&mut handle, &thread), None, grid) {
-    if solver::lrc((&mut handle, &thread), None, grid) {
+    if solver::lrc((&mut handle, &thread), None, grid) && grid.is_full() {
         println!("<@@>| solved!")
     } else {
         println!("<!!>| cannot solve sudoku with current method alone -- starting backtracker for the final step...");
-        if solver::backtracking((&mut handle, &thread), None, grid) {
+        if solver::backtracking((&mut handle, &thread), None, grid).is_none() {
             println!("<@@>| solved!")
         } else {
             eprintln!("error: cannot solve sudoku");
