@@ -25,9 +25,30 @@ impl Grid {
             };
             81
         ];
-        let mut v_blocks: Vec<tile::Unit> = vec![tile::Unit { data: Vec::with_capacity(0), full: 0, count: 0 }; 9];
-        let mut v_cols: Vec<tile::Unit> = vec![tile::Unit { data: Vec::with_capacity(0), full: 0, count: 0 }; 9];
-        let mut v_rows: Vec<tile::Unit> = vec![tile::Unit { data: Vec::with_capacity(0), full: 0, count: 0 }; 9];
+        let mut v_blocks: Vec<tile::Unit> = vec![
+            tile::Unit {
+                data: Vec::with_capacity(0),
+                full: 0,
+                count: 0
+            };
+            9
+        ];
+        let mut v_cols: Vec<tile::Unit> = vec![
+            tile::Unit {
+                data: Vec::with_capacity(0),
+                full: 0,
+                count: 0
+            };
+            9
+        ];
+        let mut v_rows: Vec<tile::Unit> = vec![
+            tile::Unit {
+                data: Vec::with_capacity(0),
+                full: 0,
+                count: 0
+            };
+            9
+        ];
         for i in 0u8..81u8 {
             let index_h: u8 = i % 9;
             let index_v: u8 = i / 9;
@@ -97,7 +118,8 @@ impl Grid {
         if tiles.len() != 81 && tiles.len() != 82 {
             panic!("error: the provided sudoku file is invalid");
         }
-        for i in 0..tiles.len() { // [ ] add disambiguation for Windows (0x0D0A)
+        for i in 0..tiles.len() {
+            // [ ] add disambiguation for Windows (0x0D0A)
             if tiles[i] > 0x30 && tiles[i] <= 0x39 {
                 let index_v: u8 = (i / 9) as u8;
                 let index_h: u8 = (i % 9) as u8;

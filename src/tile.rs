@@ -30,7 +30,7 @@ pub struct Unit {
     pub data: Vec<u8>,
     pub full: u16,
     pub count: u8,
-    //pub kind: UnitType 
+    //pub kind: UnitType
 }
 
 impl Coord {
@@ -39,14 +39,18 @@ impl Coord {
             w: 0,
             x: 0,
             y: 0,
-            z: 0
+            z: 0,
         };
     }
 }
 
 impl std::fmt::Debug for Unit {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Unit {{ data: {:?}, full: {:#b}, count: {} }}", self.data, self.full, self.count)
+        write!(
+            f,
+            "Unit {{ data: {:?}, full: {:#b}, count: {} }}",
+            self.data, self.full, self.count
+        )
     }
 }
 
@@ -65,12 +69,11 @@ impl Unit {
     }
 }
 
-
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Access {
     Default,
     LPNPass, // Last Possible Number
     LRCPass, // Last Remaining Cell
     CouplePass,
-    CanEdit
+    CanEdit,
 }

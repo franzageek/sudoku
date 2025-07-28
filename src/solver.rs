@@ -7,13 +7,12 @@
 
     [ BRUTEFORCE ]
         - backtracking      [*****] (the only one that can solve any sudoku)
-    
+
     [ ADAPTIVE ]
         - couple_candidates [**---] (very complex, but can only act on units that lack 2 elements)
         - lrc               [****-] (fairly complex, but extremely efficient; best when combined with `lpn`)
         - lpn               [***--] (very basic, but can cross out quite a lot of cells; best when combined with `lrc`)
 */
-
 
 use crate::grid;
 use crate::tile;
@@ -41,32 +40,43 @@ pub fn backtracking(
                 ui::draw_tiles(&mut rldh, grid);
             }
             //std::io::stdin().read_line(&mut String::new()).unwrap();
-            let missing_block: (u16, u8) = grid.get_missing_from(&tile::UnitType::Block, grid.tiles[i].coord.w);
-            println!("#{i} | missing from blk: {:09b},{}", (!missing_block.0) & 0x1FF, missing_block.1);
-            let missing_col: (u16, u8) = grid.get_missing_from(&tile::UnitType::Col, grid.tiles[i].coord.x);
-            println!("#{i} | missing from col: {:09b},{}", (!missing_col.0) & 0x1FF, missing_col.1);
-            let missing_row: (u16, u8) = grid.get_missing_from(&tile::UnitType::Row, grid.tiles[i].coord.y);
-            println!("#{i} | missing from row: {:09b},{}", (!missing_row.0) & 0x1FF, missing_row.1);
+            let missing_block: (u16, u8) =
+                grid.get_missing_from(&tile::UnitType::Block, grid.tiles[i].coord.w);
+            println!(
+                "#{i} | missing from blk: {:09b},{}",
+                (!missing_block.0) & 0x1FF,
+                missing_block.1
+            );
+            let missing_col: (u16, u8) =
+                grid.get_missing_from(&tile::UnitType::Col, grid.tiles[i].coord.x);
+            println!(
+                "#{i} | missing from col: {:09b},{}",
+                (!missing_col.0) & 0x1FF,
+                missing_col.1
+            );
+            let missing_row: (u16, u8) =
+                grid.get_missing_from(&tile::UnitType::Row, grid.tiles[i].coord.y);
+            println!(
+                "#{i} | missing from row: {:09b},{}",
+                (!missing_row.0) & 0x1FF,
+                missing_row.1
+            );
             let mut remaining: Vec<u16> = vec![0; 2];
             let mut biggest_len: u8 = 0;
             let mut biggest: u16 = 0;
-            if missing_block.1 > missing_col.1
-                && missing_block.1 > missing_row.1
-            {
-                biggest_len = missing_block .1;
+            if missing_block.1 > missing_col.1 && missing_block.1 > missing_row.1 {
+                biggest_len = missing_block.1;
                 remaining[0] = (!missing_col.0) & 0x1FF;
                 remaining[1] = (!missing_row.0) & 0x1FF;
                 biggest = (!missing_block.0) & 0x1FF;
             }
-            if missing_col.1 > biggest_len
-            {
+            if missing_col.1 > biggest_len {
                 biggest_len = missing_col.1;
                 remaining[0] = (!missing_block.0) & 0x1FF;
                 remaining[1] = (!missing_row.0) & 0x1FF;
                 biggest = (!missing_col.0) & 0x1FF;
             }
-            if missing_row.1 > biggest_len
-            {
+            if missing_row.1 > biggest_len {
                 remaining[0] = (!missing_block.0) & 0x1FF;
                 remaining[1] = (!missing_col.0) & 0x1FF;
                 biggest = (!missing_row.0) & 0x1FF;
@@ -79,21 +89,20 @@ pub fn backtracking(
             if possible != 0 && (possible & (possible - 1)) == 0 {
                 let val: u8 = (possible.trailing_zeros() + 1) as u8;
                 grid.tiles[i].val = val;
-                grid.blocks[grid.tiles[i].coord.w as usize].full |= 1 << val-1;
+                grid.blocks[grid.tiles[i].coord.w as usize].full |= 1 << val - 1;
                 grid.blocks[grid.tiles[i].coord.w as usize].count += 1;
-                grid.cols[grid.tiles[i].coord.x as usize].full |= 1 << val-1;
+                grid.cols[grid.tiles[i].coord.x as usize].full |= 1 << val - 1;
                 grid.cols[grid.tiles[i].coord.x as usize].count += 1;
-                grid.rows[grid.tiles[i].coord.y as usize].full |= 1 << val-1;
+                grid.rows[grid.tiles[i].coord.y as usize].full |= 1 << val - 1;
                 grid.rows[grid.tiles[i].coord.y as usize].count += 1;
-                println!("#{i} | >> came up with {} (w: {}; x: {}; y: {}) <<", val, grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y);
+                println!(
+                    "#{i} | >> came up with {} (w: {}; x: {}; y: {}) <<",
+                    val, grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y
+                );
             } else if possible != 0 && (possible & (possible - 1)) != 0 {
                 let mut attempt: u8 = 0;
-                for j in 0u8..9u8 { 
-                    let shamt: u8 = if i % 2 == 0 {
-                        8 - j
-                    } else {
-                        j
-                    };
+                for j in 0u8..9u8 {
+                    let shamt: u8 = if i % 2 == 0 { 8 - j } else { j };
                     if (possible & (1 << shamt)) > 0 {
                         attempt += 1;
                         grid.tiles[i].val = ((possible & (1 << shamt)).trailing_zeros() + 1) as u8;
@@ -105,19 +114,26 @@ pub fn backtracking(
                         grid.rows[grid.tiles[i].coord.y as usize].count += 1;
                         println!(
                             "<-->| taking a branch on #{i}{{w: {}; x: {}; y: {}}} -- attempt {attempt} <{}>",
-                            grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y,
-                            shamt+1
+                            grid.tiles[i].coord.w,
+                            grid.tiles[i].coord.x,
+                            grid.tiles[i].coord.y,
+                            shamt + 1
                         );
                         match backtracking((&mut handle, &thread), Some(i as u8), grid) {
                             None => return None,
                             Some(end) => {
                                 for k in i..=end as usize {
-                                    if grid.tiles[k].access == tile::Access::CanEdit && grid.tiles[k].val != 0{
+                                    if grid.tiles[k].access == tile::Access::CanEdit
+                                        && grid.tiles[k].val != 0
+                                    {
                                         println!("empty out: {}", grid.tiles[k].val);
                                         grid.tiles[k].val = 0;
-                                        grid.blocks[grid.tiles[k].coord.w as usize].update(&mut grid.tiles);
-                                        grid.cols[grid.tiles[k].coord.x as usize].update(&mut grid.tiles);
-                                        grid.rows[grid.tiles[k].coord.y as usize].update(&mut grid.tiles);
+                                        grid.blocks[grid.tiles[k].coord.w as usize]
+                                            .update(&mut grid.tiles);
+                                        grid.cols[grid.tiles[k].coord.x as usize]
+                                            .update(&mut grid.tiles);
+                                        grid.rows[grid.tiles[k].coord.y as usize]
+                                            .update(&mut grid.tiles);
                                     }
                                 }
                             }
@@ -148,7 +164,7 @@ pub fn backtracking(
 
 /* #region Couple Candidates */
 /// # Couple Candidates
-/// Scan through each unit until one with just two empty cells is found, then check every cell for any violation on one entry so that the cell can be filled in with the other entry, while the other cell can be filled in with this entry. 
+/// Scan through each unit until one with just two empty cells is found, then check every cell for any violation on one entry so that the cell can be filled in with the other entry, while the other cell can be filled in with this entry.
 /// This is an adaptive algorithm that "learns" from previous iterations; hence, a higher number of `rounds` can result in more cells solved.
 pub fn couple_candidates(
     (handle, thread): (&mut RaylibHandle, &RaylibThread),
@@ -158,7 +174,9 @@ pub fn couple_candidates(
     let mut limit: u8 = 81;
     let mut pass: u8 = 0;
     let mut progress: bool = true;
-    if let Some(a) = rounds { limit = a }
+    if let Some(a) = rounds {
+        limit = a
+    }
     while !grid.is_full() && pass < limit {
         if !progress {
             return false;
@@ -168,9 +186,9 @@ pub fn couple_candidates(
         println!("){pass:02}(| starting round...");
         for i in 0u8..9u8 {
             println!(")){i} | scanning units...");
-            progress |= resolve_unit_couples((handle, thread), tile::UnitType::Block, i, grid) |
-            resolve_unit_couples((handle, thread), tile::UnitType::Col, i, grid) |
-            resolve_unit_couples((handle, thread), tile::UnitType::Row, i, grid);
+            progress |= resolve_unit_couples((handle, thread), tile::UnitType::Block, i, grid)
+                | resolve_unit_couples((handle, thread), tile::UnitType::Col, i, grid)
+                | resolve_unit_couples((handle, thread), tile::UnitType::Row, i, grid);
             // leave `progress` untouched until some progress is made
         }
     }
@@ -190,10 +208,14 @@ fn resolve_unit_couples(
 ) -> bool {
     let mut unit: [tile::UnitType; 3] = [tile::UnitType::Block; 3];
     let mut possible: (tile::Coord, tile::Coord) = (tile::Coord::zeroed(), tile::Coord::zeroed());
-    let mut coord: [(u8, u8); 3] = [(0,0); 3];
+    let mut coord: [(u8, u8); 3] = [(0, 0); 3];
     let mut candidates_bitmask: u16 = 0;
     let mut done: bool = false;
-    println!("))((|size is {} for {:?}[{n}]", grid.unit(&loc)[n as usize].count, &loc);
+    println!(
+        "))((|size is {} for {:?}[{n}]",
+        grid.unit(&loc)[n as usize].count,
+        &loc
+    );
     match loc {
         tile::UnitType::Block => {
             if grid.blocks[n as usize].count == 7 {
@@ -205,18 +227,23 @@ fn resolve_unit_couples(
                     }
                 }
                 unit = [
-                    tile::UnitType::Block, 
+                    tile::UnitType::Block,
                     tile::UnitType::Col,
-                    tile::UnitType::Row
+                    tile::UnitType::Row,
                 ];
                 possible = (
-                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8)).coord, 
-                    grid.get_from(&loc, (n,(9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8)).coord
+                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8))
+                        .coord,
+                    grid.get_from(
+                        &loc,
+                        (n, (9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8),
+                    )
+                    .coord,
                 );
                 coord = [
                     (possible.0.w, possible.1.w),
                     (possible.0.x, possible.1.x),
-                    (possible.0.y, possible.1.y)
+                    (possible.0.y, possible.1.y),
                 ];
                 done = true;
             }
@@ -232,17 +259,22 @@ fn resolve_unit_couples(
                 }
                 unit = [
                     tile::UnitType::Col,
-                    tile::UnitType::Block, 
-                    tile::UnitType::Row
+                    tile::UnitType::Block,
+                    tile::UnitType::Row,
                 ];
                 possible = (
-                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8)).coord, 
-                    grid.get_from(&loc, (n,(9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8)).coord
+                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8))
+                        .coord,
+                    grid.get_from(
+                        &loc,
+                        (n, (9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8),
+                    )
+                    .coord,
                 );
                 coord = [
                     (possible.0.x, possible.1.x),
                     (possible.0.w, possible.1.w),
-                    (possible.0.y, possible.1.y)
+                    (possible.0.y, possible.1.y),
                 ];
                 done = true;
             }
@@ -257,18 +289,23 @@ fn resolve_unit_couples(
                     }
                 }
                 unit = [
-                    tile::UnitType::Row, 
-                    tile::UnitType::Block, 
-                    tile::UnitType::Col
+                    tile::UnitType::Row,
+                    tile::UnitType::Block,
+                    tile::UnitType::Col,
                 ];
                 possible = (
-                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8)).coord, 
-                    grid.get_from(&loc, (n,(9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8)).coord
+                    grid.get_from(&loc, (n, possible_bitmask.trailing_zeros() as u8))
+                        .coord,
+                    grid.get_from(
+                        &loc,
+                        (n, (9 - 1) - (possible_bitmask.leading_zeros() - 7) as u8),
+                    )
+                    .coord,
                 );
                 coord = [
                     (possible.0.y, possible.1.y),
                     (possible.0.w, possible.1.w),
-                    (possible.0.x, possible.1.x)
+                    (possible.0.x, possible.1.x),
                 ];
                 done = true;
             }
@@ -276,20 +313,23 @@ fn resolve_unit_couples(
     }
     if done {
         println!("coord: {:?}", coord);
-        println!("candidates: {:?}", (
-                (candidates_bitmask.trailing_zeros() + 1) as u8, 
-                9 - (candidates_bitmask.leading_zeros() - 7) as u8
-            ));
-        return resolve_couple_candidates(
-            (handle, thread), 
-            unit, 
-            coord, 
-            (possible.0.z, possible.1.z), 
+        println!(
+            "candidates: {:?}",
             (
-                (candidates_bitmask.trailing_zeros() + 1) as u8, 
+                (candidates_bitmask.trailing_zeros() + 1) as u8,
                 9 - (candidates_bitmask.leading_zeros() - 7) as u8
-            ), 
-            grid
+            )
+        );
+        return resolve_couple_candidates(
+            (handle, thread),
+            unit,
+            coord,
+            (possible.0.z, possible.1.z),
+            (
+                (candidates_bitmask.trailing_zeros() + 1) as u8,
+                9 - (candidates_bitmask.leading_zeros() - 7) as u8,
+            ),
+            grid,
         );
     }
     return false;
@@ -301,36 +341,60 @@ fn resolve_couple_candidates(
     coord: [(u8, u8); 3],
     zcoord: (u8, u8),
     mut candidates: (u8, u8),
-    grid: &mut grid::Grid
+    grid: &mut grid::Grid,
 ) -> bool {
     let mut done: bool = false;
-    if ( // check if placing candidate<0> in possible_cell[1] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
-        grid.unit(&unit[1])[coord[1].1 as usize].full & (1 << candidates.0-1) > 0
-        ||
-        grid.unit(&unit[2])[coord[2].1 as usize].full & (1 << candidates.0-1) > 0
-    ) || ( // check if placing candidate<1> in possible_cell[0] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
-        grid.unit(&unit[1])[coord[1].0 as usize].full & (1 << candidates.1-1) > 0 
-        ||
-        grid.unit(&unit[2])[coord[2].0 as usize].full & (1 << candidates.1-1) > 0 
+    if (
+        // check if placing candidate<0> in possible_cell[1] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
+        grid.unit(&unit[1])[coord[1].1 as usize].full & (1 << candidates.0 - 1) > 0
+            || grid.unit(&unit[2])[coord[2].1 as usize].full & (1 << candidates.0 - 1) > 0
+    ) || (
+        // check if placing candidate<1> in possible_cell[0] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
+        grid.unit(&unit[1])[coord[1].0 as usize].full & (1 << candidates.1 - 1) > 0
+            || grid.unit(&unit[2])[coord[2].0 as usize].full & (1 << candidates.1 - 1) > 0
         // NOTE: checking if the candidate is missing from other units of the other possible_cell is pointless,
         //       since there must be at least one place where to put each candidate,
         //       so we expect AT LEAST a cell from whose units the candidate is missing,
         //       and the condition would always be true
     ) {
-        println!("))((| found ({}) in [{:?}||{:?}]<{}||{}>::<{}>, applying <{}> to <{}> and <{}> to <{}>", candidates.0, unit[1], unit[2], coord[1].0, coord[2].0, zcoord.0, candidates.1, zcoord.1, candidates.0, zcoord.0);
+        println!(
+            "))((| found ({}) in [{:?}||{:?}]<{}||{}>::<{}>, applying <{}> to <{}> and <{}> to <{}>",
+            candidates.0,
+            unit[1],
+            unit[2],
+            coord[1].0,
+            coord[2].0,
+            zcoord.0,
+            candidates.1,
+            zcoord.1,
+            candidates.0,
+            zcoord.0
+        );
         grid.tiles[zcoord.0 as usize].val = candidates.0;
         grid.tiles[zcoord.1 as usize].val = candidates.1;
         done = true;
-    } else if ( // check if placing candidate<1> in possible_cell[1] would result in a violation (not permitted, <1> must be placed in [0] and <0> in [1])
-        grid.unit(&unit[1])[coord[1].1 as usize].full & (1 << candidates.1-1) > 0 
-        ||
-        grid.unit(&unit[2])[coord[2].1 as usize].full & (1 << candidates.1-1) > 0 
-    ) || ( // check if placing candidate<0> in possible_cell[0] would result in a violation (not permitted, <1> must be placed in [0] and <0> in [1])
-        grid.unit(&unit[1])[coord[1].0 as usize].full & (1 << candidates.0-1) > 0 
-        ||
-        grid.unit(&unit[2])[coord[2].0 as usize].full & (1 << candidates.0-1) > 0 
+    } else if (
+        // check if placing candidate<1> in possible_cell[1] would result in a violation (not permitted, <1> must be placed in [0] and <0> in [1])
+        grid.unit(&unit[1])[coord[1].1 as usize].full & (1 << candidates.1 - 1) > 0
+            || grid.unit(&unit[2])[coord[2].1 as usize].full & (1 << candidates.1 - 1) > 0
+    ) || (
+        // check if placing candidate<0> in possible_cell[0] would result in a violation (not permitted, <1> must be placed in [0] and <0> in [1])
+        grid.unit(&unit[1])[coord[1].0 as usize].full & (1 << candidates.0 - 1) > 0
+            || grid.unit(&unit[2])[coord[2].0 as usize].full & (1 << candidates.0 - 1) > 0
     ) {
-        println!("))((| found ({}) in [{:?}||{:?}]<{}||{}>::<{}>, applying <{}> to <{}> and <{}> to <{}>", candidates.1, unit[1], unit[2], coord[1].1, coord[2].1, zcoord.1, candidates.1, zcoord.0, candidates.0, zcoord.1);
+        println!(
+            "))((| found ({}) in [{:?}||{:?}]<{}||{}>::<{}>, applying <{}> to <{}> and <{}> to <{}>",
+            candidates.1,
+            unit[1],
+            unit[2],
+            coord[1].1,
+            coord[2].1,
+            zcoord.1,
+            candidates.1,
+            zcoord.0,
+            candidates.0,
+            zcoord.1
+        );
         grid.tiles[zcoord.0 as usize].val = candidates.1;
         grid.tiles[zcoord.1 as usize].val = candidates.0;
         std::mem::swap(&mut candidates.0, &mut candidates.1);
@@ -342,15 +406,15 @@ fn resolve_couple_candidates(
 
         grid.unit(&unit[0])[coord[0].0 as usize].count = 9;
         grid.unit(&unit[0])[coord[0].0 as usize].full = 0x1FF;
-    
-        grid.unit(&unit[1])[coord[1].0 as usize].full |= 1 << candidates.0-1;
+
+        grid.unit(&unit[1])[coord[1].0 as usize].full |= 1 << candidates.0 - 1;
         grid.unit(&unit[1])[coord[1].0 as usize].count += 1;
-        grid.unit(&unit[1])[coord[1].1 as usize].full |= 1 << candidates.1-1;
+        grid.unit(&unit[1])[coord[1].1 as usize].full |= 1 << candidates.1 - 1;
         grid.unit(&unit[1])[coord[1].1 as usize].count += 1;
-    
-        grid.unit(&unit[2])[coord[2].0 as usize].full |= 1 << candidates.0-1;
+
+        grid.unit(&unit[2])[coord[2].0 as usize].full |= 1 << candidates.0 - 1;
         grid.unit(&unit[2])[coord[2].0 as usize].count += 1;
-        grid.unit(&unit[2])[coord[2].1 as usize].full |= 1 << candidates.1-1;
+        grid.unit(&unit[2])[coord[2].1 as usize].full |= 1 << candidates.1 - 1;
         grid.unit(&unit[2])[coord[2].1 as usize].count += 1;
 
         let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
@@ -374,7 +438,9 @@ pub fn lrc(
     let mut limit: u8 = 81;
     let mut pass: u8 = 0;
     let mut progress: bool = true;
-    if let Some(a) = rounds { limit = a }
+    if let Some(a) = rounds {
+        limit = a
+    }
     while !grid.is_full() && pass < limit {
         if !progress {
             return false;
@@ -391,25 +457,27 @@ pub fn lrc(
             for block in 0u8..9u8 {
                 if !grid.contains(tile::UnitType::Block, block, num) {
                     println!(">>{num} | found suitable block ({block})");
-                    let mut possible: u16 = 0;/*Vec<u8> = Vec::with_capacity(0);*/
+                    let mut possible: u16 = 0; /*Vec<u8> = Vec::with_capacity(0);*/
                     for cell in 0u8..9u8 {
-                        let tile: &tile::Tile = grid.get_from(
-                            &tile::UnitType::Block, 
-                            (block, cell)
-                        );
+                        let tile: &tile::Tile =
+                            grid.get_from(&tile::UnitType::Block, (block, cell));
                         let x: u8 = tile.coord.x;
                         let y: u8 = tile.coord.y;
                         //println!(">>{num} | cell<{cell}>; val<{}>; edit<{}>; x<{}>; y<{}>; colc<{}>; rowc<{}>", tile.val, tile.access as u8, tile.coord.x, tile.coord.y, grid.contains(tile::UnitType::Col, tile.coord.x, num), grid.contains(tile::UnitType::Row, tile.coord.y, num));
-                        if tile.val == 0 
+                        if tile.val == 0
                             && tile.access == tile::Access::CanEdit
-                            && !grid.contains(tile::UnitType::Col, x, num) 
-                            && !grid.contains(tile::UnitType::Row, y, num) {
+                            && !grid.contains(tile::UnitType::Col, x, num)
+                            && !grid.contains(tile::UnitType::Row, y, num)
+                        {
                             possible |= 1 << (cell);
                             //println!(">>{num} | found suitable cell in block ({cell})");
                         }
-                    } 
+                    }
                     if possible > 0 && (possible & (possible - 1)) == 0 {
-                        let tile: &mut tile::Tile = grid.get_from(&tile::UnitType::Block, (block, possible.trailing_zeros() as u8));
+                        let tile: &mut tile::Tile = grid.get_from(
+                            &tile::UnitType::Block,
+                            (block, possible.trailing_zeros() as u8),
+                        );
                         tile.val = num;
                         tile.access = tile::Access::LRCPass;
                         let coord: tile::Coord = tile.coord;
@@ -421,7 +489,8 @@ pub fn lrc(
                         grid.rows[coord.y as usize].count += 1;
                         progress = true;
                         println!("!!{num} | successfully place number!");
-                        let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
+                        let mut rldh: core::drawing::RaylibDrawHandle =
+                            handle.begin_drawing(&thread);
                         ui::draw_tiles(&mut rldh, grid);
                     } else {
                         println!("<!!>| too many cells suitable for <{num}> in block <{block}>");
@@ -431,9 +500,11 @@ pub fn lrc(
         }
     }
     //resolve_couples((handle, thread), grid);
-    if !grid.is_full() { 
+    if !grid.is_full() {
         if !lpn((handle, thread), None, grid) // one last round of LPN to see if there are any leftovers
-        && !couple_candidates((handle, thread), None, grid) { // one last round of CC to see if there are any leftovers
+        && !couple_candidates((handle, thread), None, grid)
+        {
+            // one last round of CC to see if there are any leftovers
             return false;
         }
     }
@@ -454,7 +525,9 @@ pub fn lpn(
     let mut limit: u8 = 81;
     let mut pass: u8 = 0;
     let mut progress: bool = true;
-    if let Some(a) = rounds { limit = a }
+    if let Some(a) = rounds {
+        limit = a
+    }
     while !grid.is_full() && pass < limit {
         if !progress {
             return false;
@@ -473,11 +546,11 @@ pub fn lpn(
                     let val: u8 = (possible.trailing_zeros() + 1) as u8;
                     grid.tiles[i as usize].val = val;
                     grid.tiles[i as usize].access = tile::Access::LPNPass;
-                    grid.blocks[coord.w as usize].full |= 1 << val-1;
+                    grid.blocks[coord.w as usize].full |= 1 << val - 1;
                     grid.blocks[coord.w as usize].count += 1;
-                    grid.cols[coord.x as usize].full |= 1 << val-1;
+                    grid.cols[coord.x as usize].full |= 1 << val - 1;
                     grid.cols[coord.x as usize].count += 1;
-                    grid.rows[coord.y as usize].full |= 1 << val-1;
+                    grid.rows[coord.y as usize].full |= 1 << val - 1;
                     grid.rows[coord.y as usize].count += 1;
                     progress = true;
                     println!("$${val} | successfully place in #{}", coord.z);
