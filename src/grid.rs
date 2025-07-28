@@ -130,6 +130,20 @@ impl Grid {
         return val > 0 && ((self.get_missing_from(&loc, n).0 & (1 << (val - 1))) > 0);
     }
 
+    pub fn unit(&mut self, loc: &UnitType) -> &mut Vec<tile::Unit> {
+        match loc {
+            tile::UnitType::Block => {
+                return &mut self.blocks;
+            }
+            tile::UnitType::Col => {
+                return &mut self.cols;
+            }
+            tile::UnitType::Row => {
+                return &mut self.rows;
+            }
+        }
+    }
+
     pub fn is_full(&mut self) -> bool {
         for i in 0u8..81u8 {
             if self.tiles[i as usize].val == 0 {

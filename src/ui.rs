@@ -4,7 +4,7 @@ use raylib::prelude::RaylibDraw;
 use raylib::*;
 
 const PADDING: u16 = 3;
-pub const WINDOW_SIZE: u16 = 9 * 90 + PADDING;
+pub const WINDOW_SIZE: u16 = 9 * 60 + PADDING;
 pub const TILE_SIZE: u16 = WINDOW_SIZE / 9;
 pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
     rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
@@ -32,9 +32,11 @@ pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
                     60,
                     if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Default  {
                         raylib::color::rcolor(0, 0x77, 0xAA, 0xFF)
-                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Step1 {
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::LPNPass {
+                        raylib::color::rcolor(0xBB, 0x00, 0xBB, 0xFF)
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::LRCPass {
                         raylib::color::rcolor(00, 0xDD, 0x55, 0xFF)
-                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Step2 {
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::CouplePass {
                         raylib::color::rcolor(0xFF, 0x55, 0x55, 0xFF)
                     } else {
                         raylib::color::rcolor(0xFF, 0xAA, 0x77, 0xFF)

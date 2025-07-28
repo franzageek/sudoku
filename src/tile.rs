@@ -18,7 +18,7 @@ pub struct Tile {
 }
 
 #[allow(dead_code)]
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum UnitType {
     Block,
     Row,
@@ -29,8 +29,19 @@ pub enum UnitType {
 pub struct Unit {
     pub data: Vec<u8>,
     pub full: u16,
-    pub count: u8
+    pub count: u8,
     //pub kind: UnitType 
+}
+
+impl Coord {
+    pub fn zeroed() -> Coord {
+        return Coord {
+            w: 0,
+            x: 0,
+            y: 0,
+            z: 0
+        };
+    }
 }
 
 impl std::fmt::Debug for Unit {
@@ -58,7 +69,8 @@ impl Unit {
 #[derive(Debug, Clone, Copy, Eq, PartialEq)]
 pub enum Access {
     Default,
-    Step1,
-    Step2,
+    LPNPass, // Last Possible Number
+    LRCPass, // Last Remaining Cell
+    CouplePass,
     CanEdit
 }
