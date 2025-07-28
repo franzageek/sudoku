@@ -37,7 +37,7 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
             println!("click on x{col}y{row}z{tile}");
         }
         let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
-        rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+        rldh.clear_background(raylib::color::rcolor(0, 0, 0, 0xFF));
         ui::draw_tiles(&mut rldh, grid);
     }
     return;
@@ -61,7 +61,7 @@ pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid
     while !handle.window_should_close() {
         let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
         ui::draw_tiles(&mut rldh, grid);
-        rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+        rldh.clear_background(raylib::color::rcolor(0, 0, 0, 0xFF));
     }
     return;
 }

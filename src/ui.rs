@@ -7,7 +7,7 @@ const PADDING: u16 = 3;
 pub const WINDOW_SIZE: u16 = 9 * 60 + PADDING;
 pub const TILE_SIZE: u16 = WINDOW_SIZE / 9;
 pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
-    rldh.clear_background(raylib::color::rcolor(0x00, 0xAA, 0xAA, 0xDD));
+    rldh.clear_background(raylib::color::rcolor(0, 0, 0, 0xFF));
     for row in 0..9 {
         for col in 0..9 {
             let x: u16 = col * TILE_SIZE;
@@ -18,7 +18,7 @@ pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
                 (y + PADDING) as i32,
                 (TILE_SIZE - PADDING) as i32,
                 (TILE_SIZE - PADDING) as i32,
-                raylib::color::rcolor(0xFF, 0xFF, 0xFF, 0xDD),
+                raylib::color::rcolor(0xFF, 0xFF, 0xFF, 0x3F),
             );
             if grid.tiles[(row * 9 + col) as usize].val > 0 {
                 rldh.draw_text(
@@ -31,17 +31,15 @@ pub fn draw_tiles(rldh: &mut RaylibDrawHandle, grid: &grid::Grid) {
                     (y + TILE_SIZE / 2 - PADDING * 8) as i32,
                     60,
                     if grid.tiles[(row * 9 + col) as usize].access == tile::Access::Default {
-                        raylib::color::rcolor(0, 0x77, 0xAA, 0xFF)
+                        raylib::color::rcolor(0x33, 0xAA, 0xDD, 0xFF)
                     } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::LPNPass {
-                        raylib::color::rcolor(0xBB, 0x00, 0xBB, 0xFF)
+                        raylib::color::rcolor(0xDD, 0x22, 0xDD, 0xFF)
                     } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::LRCPass {
                         raylib::color::rcolor(00, 0xDD, 0x55, 0xFF)
-                    } else if grid.tiles[(row * 9 + col) as usize].access
-                        == tile::Access::CouplePass
-                    {
+                    } else if grid.tiles[(row * 9 + col) as usize].access == tile::Access::CouplePass {
                         raylib::color::rcolor(0xFF, 0x55, 0x55, 0xFF)
                     } else {
-                        raylib::color::rcolor(0xFF, 0xAA, 0x77, 0xFF)
+                        raylib::color::rcolor(0xDD, 0x88, 0x55, 0xFF)
                     },
                 );
             } /*else {
