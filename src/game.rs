@@ -47,13 +47,13 @@ pub fn main_loop((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut 
 pub fn solve((mut handle, thread): (RaylibHandle, RaylibThread), grid: &mut grid::Grid) {
     //if solver::backtracking((&mut handle, &thread), None, grid) {
     if solver::lrc((&mut handle, &thread), None, grid) && grid.is_full() {
-        println!("<@@>| solved!")
+        println!("< !! > Solved!");
     } else {
         println!(
-            "<!!>| cannot solve sudoku with current method alone -- starting backtracker for the final step..."
+            "< !! > Cannot solve sudoku with current method alone -- starting backtracker for the final step"
         );
         if solver::backtracking((&mut handle, &thread), None, grid).is_none() {
-            println!("<@@>| solved!")
+            println!("< !! > Solved!");
         } else {
             eprintln!("error: cannot solve sudoku");
         }
