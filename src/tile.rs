@@ -65,7 +65,6 @@ impl Unit {
                 self.count += 1;
             }
         }
-        //println!("updated presence: {:09b}->{:09b}", (!old) & 0x1FF, (!self.full) & 0x1FF);
     }
 }
 
