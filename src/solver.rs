@@ -14,6 +14,7 @@
         - lpn               [***--] (PURPLE) (very basic, but can cross out quite a lot of cells; best when combined with `lrc`)
 */
 
+use crate::flags;
 use crate::grid;
 use crate::tile;
 use crate::ui;
@@ -32,10 +33,13 @@ pub fn backtracking(
         Some(a) => start = a as usize,
         None => start = 0,
     }
+    let fast: bool = !flags::get_flags().fast;
+    let verb: bool = !flags::get_flags().silent;
     for i in start..81 {
         //std::thread::sleep(std::time::Duration::from_millis(50));
         if grid.tiles[i].val == 0 && grid.tiles[i].access == tile::Access::CanEdit {
-            {
+            if fast {
+                /* >> disabled for debugging purposes */
                 let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
                 ui::draw_tiles(&mut rldh, grid);
             }
@@ -56,10 +60,12 @@ pub fn backtracking(
                 grid.cols[grid.tiles[i].coord.x as usize].count += 1;
                 grid.rows[grid.tiles[i].coord.y as usize].full |= 1 << val - 1;
                 grid.rows[grid.tiles[i].coord.y as usize].count += 1;
-                println!(
-                    "** BCK ** Successfully placed a {} in cell {{ w: {}; x: {}; y: {}; z: {i}}}",
-                    val, grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y
-                );
+                if verb {
+                    println!(
+                        "** BCK ** Successfully placed a {} in cell {{ w: {}; x: {}; y: {}; z: {i}}}",
+                        val, grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y
+                    );
+                }
             } else if possible != 0 && (possible & (possible - 1)) != 0 {
                 let mut attempt: u8 = 0;
                 for j in 0u8..9u8 { 
@@ -80,6 +86,15 @@ pub fn backtracking(
                         match backtracking((&mut handle, &thread), Some(i as u8), grid) { // if there's more than one option for a cell, take a branch here with the possibility of coming back later if it's wrong
                             None => return None, // if the branch was correct, return
                             Some(end) => { // otherwise, restore the state as it was before the branch 
+                        if verb {
+                            println!(
+                                "** BCK ** Taking a branch for cell {{ w: {}; x: {}; y: {}; z: {i}}} -- attempt {attempt} with <{}>",
+                                grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y, shamt + 1
+                            );
+                        }
+                        match backtracking((&mut handle, &thread), Some(i as u8), grid) {
+                            None => return None,
+                            Some(end) => {
                                 for k in i..=end as usize {
                                     if grid.tiles[k].access == tile::Access::CanEdit
                                         && grid.tiles[k].val != 0
@@ -98,11 +113,19 @@ pub fn backtracking(
                     }
                 }
                 return Some(i as u8);
+<<<<<<< Updated upstream
             } else { // if no option is available, backtrack towards the nearest branch taken
                 println!(
                     "** BCK ** Wrong branch! Backtracking one step, going back to cell {{ w: {}; x: {}; y: {}; z: {start}}}",
                     grid.tiles[start].coord.w, grid.tiles[start].coord.x, grid.tiles[start].coord.y
                 );
+            } else {
+                if verb {
+                    println!(
+                        "** BCK ** Wrong branch! Backtracking one step, going back to cell {{ w: {}; x: {}; y: {}; z: {start}}}",
+                        grid.tiles[start].coord.w, grid.tiles[start].coord.x, grid.tiles[start].coord.y
+                    );
+                }
                 for j in start..i {
                     if grid.tiles[j].access == tile::Access::CanEdit {
                         grid.tiles[j].val = 0;
@@ -115,8 +138,10 @@ pub fn backtracking(
             }
         }
     }
+    /* >> disabled for debugging purposes
     let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
     ui::draw_tiles(&mut rldh, grid);
+    */
     return None; // ‘None‘ means success
 }
 /* #endregion */
@@ -287,7 +312,12 @@ fn resolve_couple_candidates(
     zcoord: (u8, u8),
     mut candidates: (u8, u8),
     grid: &mut grid::Grid,
+<<<<<<< Updated upstream
 ) -> bool { // [ ] (maybe) rewrite with Unit && UnitType
+=======
+) -> bool {
+    let verb: bool = !flags::get_flags().silent;
+>>>>>>> Stashed changes
     let mut done: bool = false;
     if (
         // check if placing candidate<0> in possible_cell[1] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
@@ -304,19 +334,21 @@ fn resolve_couple_candidates(
     ) {
         grid.tiles[zcoord.0 as usize].val = candidates.0;
         grid.tiles[zcoord.1 as usize].val = candidates.1;
-        println!(
-            "** CC ** Successfully placed a {} in cell {{w: {}; x: {}; y: {}; z: {}}} and a {} in cell {{w: {}; x: {}; y: {}; z: {}}}",
-            candidates.0,
-            grid.tiles[zcoord.0 as usize].coord.w,
-            grid.tiles[zcoord.0 as usize].coord.x,
-            grid.tiles[zcoord.0 as usize].coord.y,
-            zcoord.0,
-            candidates.1,
-            grid.tiles[zcoord.1 as usize].coord.w,
-            grid.tiles[zcoord.1 as usize].coord.x,
-            grid.tiles[zcoord.1 as usize].coord.y,
-            zcoord.1
-        );
+        if verb {
+            println!(
+                "** CC ** Successfully placed a {} in cell {{w: {}; x: {}; y: {}; z: {}}} and a {} in cell {{w: {}; x: {}; y: {}; z: {}}}",
+                candidates.0,
+                grid.tiles[zcoord.0 as usize].coord.w,
+                grid.tiles[zcoord.0 as usize].coord.x,
+                grid.tiles[zcoord.0 as usize].coord.y,
+                zcoord.0,
+                candidates.1,
+                grid.tiles[zcoord.1 as usize].coord.w,
+                grid.tiles[zcoord.1 as usize].coord.x,
+                grid.tiles[zcoord.1 as usize].coord.y,
+                zcoord.1
+            );
+        }
         done = true;
     } else if (
         // check if placing candidate<1> in possible_cell[1] would result in a violation (not permitted, <1> must be placed in [0] and <0> in [1])
@@ -329,19 +361,21 @@ fn resolve_couple_candidates(
     ) {
         grid.tiles[zcoord.0 as usize].val = candidates.1;
         grid.tiles[zcoord.1 as usize].val = candidates.0;
-        println!(
-            "** CC ** Successfully placed a {} in cell {{w: {}; x: {}; y: {}; z: {}}} and a {} in cell {{w: {}; x: {}; y: {}; z: {}}}",
-            candidates.1,
-            grid.tiles[zcoord.0 as usize].coord.w,
-            grid.tiles[zcoord.0 as usize].coord.x,
-            grid.tiles[zcoord.0 as usize].coord.y,
-            zcoord.0,
-            candidates.0,
-            grid.tiles[zcoord.1 as usize].coord.w,
-            grid.tiles[zcoord.1 as usize].coord.x,
-            grid.tiles[zcoord.1 as usize].coord.y,
-            zcoord.1
-        );
+        if verb {
+            println!(
+                "** CC ** Successfully placed a {} in cell {{w: {}; x: {}; y: {}; z: {}}} and a {} in cell {{w: {}; x: {}; y: {}; z: {}}}",
+                candidates.1,
+                grid.tiles[zcoord.0 as usize].coord.w,
+                grid.tiles[zcoord.0 as usize].coord.x,
+                grid.tiles[zcoord.0 as usize].coord.y,
+                zcoord.0,
+                candidates.0,
+                grid.tiles[zcoord.1 as usize].coord.w,
+                grid.tiles[zcoord.1 as usize].coord.x,
+                grid.tiles[zcoord.1 as usize].coord.y,
+                zcoord.1
+            );
+        }
         std::mem::swap(&mut candidates.0, &mut candidates.1);
         done = true;
     }
@@ -362,11 +396,15 @@ fn resolve_couple_candidates(
         grid.unit(&unit[2])[coord[2].1 as usize].full |= 1 << candidates.1 - 1;
         grid.unit(&unit[2])[coord[2].1 as usize].count += 1;
 
+        /* >> disabled for debugging purposes
         let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
         ui::draw_tiles(&mut rldh, grid);
+        */
         return true;
     }
-    println!("** CC ** Unable to fill out any cell in current unit");
+    if verb {
+        println!("** CC ** Unable to fill out any cell in current unit");
+    }
     return false;
 }
 /* #endregion */
@@ -380,6 +418,7 @@ pub fn lrc(
     rounds: Option<u8>,
     grid: &mut grid::Grid,
 ) -> bool {
+    let verb: bool = !flags::get_flags().silent;
     let mut limit: u8 = 81;
     let mut pass: u8 = 0;
     let mut progress: bool = true;
@@ -396,9 +435,13 @@ pub fn lrc(
         };
         pass += 1;
         progress = false;
-        println!("** LRC ** Starting round {pass:02}");
+        if verb {
+            println!("** LRC ** Starting round {pass:02}");
+        }
         for num in 1u8..=9u8 {
-            println!("** LRC ** Starting cycle for number {num}");
+            if verb {
+                println!("** LRC ** Starting cycle for number {num}");
+            }
             for block in 0u8..9u8 {
                 if !grid.contains(tile::UnitType::Block, block, num) {
                     let mut possible: u16 = 0; 
@@ -430,17 +473,34 @@ pub fn lrc(
                         grid.rows[coord.y as usize].full |= 1 << (num - 1);
                         grid.rows[coord.y as usize].count += 1;
                         progress = true;
+<<<<<<< Updated upstream
                         println!("** LRC ** Successfully placed a {num} in cell {{w: {block}; x: {}; y: {}; z: {}}}", coord.x, coord.y, coord.z);
                         let mut rldh: core::drawing::RaylibDrawHandle =
                             handle.begin_drawing(&thread);
                         ui::draw_tiles(&mut rldh, grid);
+=======
+                        if verb {
+                            println!("** LRC ** Successfully placed a {num} in cell {{w: {block}; x: {}; y: {}; z: {}}}", coord.x, coord.y, coord.z);
+                        }
+                        //println!("!!{num} | successfully place number!");
+                        /* >> disabled for debugging purposes
+                        ui::draw_tiles(&mut handle.begin_drawing(&thread), grid);
+                        */
+>>>>>>> Stashed changes
                     } else {
-                        println!("** LRC ** Too many options for putting a {num} in block {block}");
+                        if verb {
+                            println!("** LRC ** Too many options for putting a {num} in block {block}");
+                        }
                     }
                 }
             }
         }
     }
+<<<<<<< Updated upstream
+=======
+    //resolve_couples((handle, thread), grid);
+    ui::draw_tiles(&mut handle.begin_drawing(&thread), grid);
+>>>>>>> Stashed changes
     if !grid.is_full() {
         if !lpn((handle, thread), None, grid) // one last round of LPN to see if there are any leftovers
         && !couple_candidates((handle, thread), None, grid) { // one last round of CC to see if there are any leftovers
@@ -461,6 +521,7 @@ pub fn lpn(
     rounds: Option<u8>,
     grid: &mut grid::Grid,
 ) -> bool {
+    let verb: bool = !flags::get_flags().silent;
     let mut limit: u8 = 81;
     let mut pass: u8 = 0;
     let mut progress: bool = true;
@@ -473,7 +534,9 @@ pub fn lpn(
         }
         pass += 1;
         progress = false;
-        println!("** LPN ** Starting round {pass:02}");
+        if verb {
+            println!("** LPN ** Starting round {pass:02}");
+        }
         for i in 0u8..81u8 {
             if grid.tiles[i as usize].access == tile::Access::CanEdit {
                 let coord: tile::Coord = grid.tiles[i as usize].coord;
@@ -492,9 +555,17 @@ pub fn lpn(
                     grid.rows[coord.y as usize].full |= 1 << val - 1;
                     grid.rows[coord.y as usize].count += 1;
                     progress = true;
+<<<<<<< Updated upstream
                     println!("** LPN ** Successfully placed a {val} in cell {{w: {}; x: {}; y: {}; z: {}}}", coord.w, coord.x, coord.y, coord.z);
+=======
+                    if verb {
+                        println!("** LRC ** Successfully placed a {val} in cell {{w: {}; x: {}; y: {}; z: {}}}", coord.w, coord.x, coord.y, coord.z);
+                    }
+                    /* >> disabled for debugging purposes
+>>>>>>> Stashed changes
                     let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
                     ui::draw_tiles(&mut rldh, grid);
+                    */
                 }
             }
         }

@@ -111,7 +111,8 @@ impl Grid {
         }
     }
 
-    pub fn polulate(&mut self, filename: &str) {
+    pub fn polulate(&mut self, filename: &String) {
+        println!("reading file '{filename}'...");
         let tiles: Vec<u8> = std::fs::read_to_string(filename)
             .expect("error: cannot read file")
             .into_bytes();
