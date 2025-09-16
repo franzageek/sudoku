@@ -2,9 +2,10 @@
 pub struct Flags {
     pub fast: bool,
     pub silent: bool,
+    pub linear: bool,
 }
 
-static mut flags: Flags = Flags { fast: false, silent: false };
+static mut flags: Flags = Flags { fast: false, silent: false, linear: false };
 
 pub fn init_flags(args: &Vec<String>) {
     for i in args {
@@ -15,6 +16,10 @@ pub fn init_flags(args: &Vec<String>) {
         } else if i == "-s" {
             unsafe {
                 flags.silent = true;
+            }
+        } else if i == "-l" {
+            unsafe {
+                flags.linear = true;
             }
         }
     }

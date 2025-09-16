@@ -35,6 +35,7 @@ pub fn backtracking(
     }
     let fast: bool = !flags::get_flags().fast;
     let verb: bool = !flags::get_flags().silent;
+    let alternating: bool = !flags::get_flags().linear;
     for i in start..81 {
         //std::thread::sleep(std::time::Duration::from_millis(50));
         if grid.tiles[i].val == 0 && grid.tiles[i].access == tile::Access::CanEdit {
@@ -69,7 +70,11 @@ pub fn backtracking(
             } else if possible != 0 && (possible & (possible - 1)) != 0 {
                 let mut attempt: u8 = 0;
                 for j in 0u8..9u8 {
-                    let shamt: u8 = if i % 2 == 0 { 8 - j } else { j };
+                    let shamt: u8 = if i % 2 == 0 && alternating {
+                        8 - j
+                    } else {
+                        j
+                    };
                     if (possible & (1 << shamt)) > 0 {
                         attempt += 1;
                         grid.tiles[i].val = ((possible & (1 << shamt)).trailing_zeros() + 1) as u8;
