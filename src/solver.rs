@@ -51,7 +51,7 @@ pub fn backtracking(
                 grid.get_missing_from(&tile::UnitType::Row, grid.tiles[i].coord.y);
 
             let possible: u16 = (!missing_block.0 & 0x1FF) & (!missing_col.0 & 0x1FF) & (!missing_row.0 & 0x1FF); // cross-check presence data to get possible entries only
-            if possible != 0 && (possible & (possible - 1)) == 0 { // if there's only one option available for a cell, fill it in and move on 
+            if possible != 0 && (possible & (possible - 1)) == 0 { // if there's only one option available for a cell, fill it in and move on
                 let val: u8 = (possible.trailing_zeros() + 1) as u8;
                 grid.tiles[i].val = val;
                 grid.blocks[grid.tiles[i].coord.w as usize].full |= 1 << val - 1;
@@ -68,7 +68,7 @@ pub fn backtracking(
                 }
             } else if possible != 0 && (possible & (possible - 1)) != 0 {
                 let mut attempt: u8 = 0;
-                for j in 0u8..9u8 { 
+                for j in 0u8..9u8 {
                     let shamt: u8 = if i % 2 == 0 { 8 - j } else { j };
                     if (possible & (1 << shamt)) > 0 {
                         attempt += 1;
@@ -79,13 +79,6 @@ pub fn backtracking(
                         grid.cols[grid.tiles[i].coord.x as usize].count += 1;
                         grid.rows[grid.tiles[i].coord.y as usize].full |= 1 << shamt;
                         grid.rows[grid.tiles[i].coord.y as usize].count += 1;
-                        println!(
-                            "** BCK ** Taking a branch for cell {{ w: {}; x: {}; y: {}; z: {i}}} -- attempt {attempt} with <{}>",
-                            grid.tiles[i].coord.w, grid.tiles[i].coord.x, grid.tiles[i].coord.y, shamt + 1
-                        );
-                        match backtracking((&mut handle, &thread), Some(i as u8), grid) { // if there's more than one option for a cell, take a branch here with the possibility of coming back later if it's wrong
-                            None => return None, // if the branch was correct, return
-                            Some(end) => { // otherwise, restore the state as it was before the branch 
                         if verb {
                             println!(
                                 "** BCK ** Taking a branch for cell {{ w: {}; x: {}; y: {}; z: {i}}} -- attempt {attempt} with <{}>",
@@ -113,12 +106,6 @@ pub fn backtracking(
                     }
                 }
                 return Some(i as u8);
-<<<<<<< Updated upstream
-            } else { // if no option is available, backtrack towards the nearest branch taken
-                println!(
-                    "** BCK ** Wrong branch! Backtracking one step, going back to cell {{ w: {}; x: {}; y: {}; z: {start}}}",
-                    grid.tiles[start].coord.w, grid.tiles[start].coord.x, grid.tiles[start].coord.y
-                );
             } else {
                 if verb {
                     println!(
@@ -195,8 +182,8 @@ fn resolve_unit_couples(
     let mut candidates_bitmask: u16 = 0;
     let mut done: bool = false;
     match loc {
-        tile::UnitType::Block => { 
-            if grid.blocks[n as usize].count == 7 { 
+        tile::UnitType::Block => {
+            if grid.blocks[n as usize].count == 7 {
                 candidates_bitmask = !grid.blocks[n as usize].full & 0x1FF;
                 let mut possible_bitmask: u16 = 0;
                 for i in 0u8..9u8 { // take note on the free cells for the specified unit
@@ -312,12 +299,8 @@ fn resolve_couple_candidates(
     zcoord: (u8, u8),
     mut candidates: (u8, u8),
     grid: &mut grid::Grid,
-<<<<<<< Updated upstream
 ) -> bool { // [ ] (maybe) rewrite with Unit && UnitType
-=======
-) -> bool {
     let verb: bool = !flags::get_flags().silent;
->>>>>>> Stashed changes
     let mut done: bool = false;
     if (
         // check if placing candidate<0> in possible_cell[1] would result in a violation (not permitted, <0> must be placed in [0] and <1> in [1])
@@ -444,7 +427,7 @@ pub fn lrc(
             }
             for block in 0u8..9u8 {
                 if !grid.contains(tile::UnitType::Block, block, num) {
-                    let mut possible: u16 = 0; 
+                    let mut possible: u16 = 0;
                     for cell in 0u8..9u8 {
                         let tile: &tile::Tile =
                             grid.get_from(&tile::UnitType::Block, (block, cell));
@@ -473,12 +456,6 @@ pub fn lrc(
                         grid.rows[coord.y as usize].full |= 1 << (num - 1);
                         grid.rows[coord.y as usize].count += 1;
                         progress = true;
-<<<<<<< Updated upstream
-                        println!("** LRC ** Successfully placed a {num} in cell {{w: {block}; x: {}; y: {}; z: {}}}", coord.x, coord.y, coord.z);
-                        let mut rldh: core::drawing::RaylibDrawHandle =
-                            handle.begin_drawing(&thread);
-                        ui::draw_tiles(&mut rldh, grid);
-=======
                         if verb {
                             println!("** LRC ** Successfully placed a {num} in cell {{w: {block}; x: {}; y: {}; z: {}}}", coord.x, coord.y, coord.z);
                         }
@@ -486,7 +463,6 @@ pub fn lrc(
                         /* >> disabled for debugging purposes
                         ui::draw_tiles(&mut handle.begin_drawing(&thread), grid);
                         */
->>>>>>> Stashed changes
                     } else {
                         if verb {
                             println!("** LRC ** Too many options for putting a {num} in block {block}");
@@ -496,11 +472,8 @@ pub fn lrc(
             }
         }
     }
-<<<<<<< Updated upstream
-=======
     //resolve_couples((handle, thread), grid);
     ui::draw_tiles(&mut handle.begin_drawing(&thread), grid);
->>>>>>> Stashed changes
     if !grid.is_full() {
         if !lpn((handle, thread), None, grid) // one last round of LPN to see if there are any leftovers
         && !couple_candidates((handle, thread), None, grid) { // one last round of CC to see if there are any leftovers
@@ -555,14 +528,10 @@ pub fn lpn(
                     grid.rows[coord.y as usize].full |= 1 << val - 1;
                     grid.rows[coord.y as usize].count += 1;
                     progress = true;
-<<<<<<< Updated upstream
-                    println!("** LPN ** Successfully placed a {val} in cell {{w: {}; x: {}; y: {}; z: {}}}", coord.w, coord.x, coord.y, coord.z);
-=======
                     if verb {
                         println!("** LRC ** Successfully placed a {val} in cell {{w: {}; x: {}; y: {}; z: {}}}", coord.w, coord.x, coord.y, coord.z);
                     }
                     /* >> disabled for debugging purposes
->>>>>>> Stashed changes
                     let mut rldh: core::drawing::RaylibDrawHandle = handle.begin_drawing(&thread);
                     ui::draw_tiles(&mut rldh, grid);
                     */
